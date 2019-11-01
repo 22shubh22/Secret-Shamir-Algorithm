@@ -14,7 +14,7 @@ public:
 	// Parameters: 
 	//	n - total number of people 
 	//	k - people need to discover secret 
-	ShamirSSScheme(UInt n, UInt k); 
+	ShamirSSScheme(UInt n, UInt k, unsigned char c); 
 public: 
 	~ShamirSSScheme(void); 
  
@@ -26,12 +26,12 @@ public:
  
 private: 
 	// generates the base polynom fro the scheme 
-	void GeneratePolynom(); 
+	void GeneratePolynom(unsigned char c); 
 	// calculate the sharing parts 
 	void CalculateSharingParts(); 
  
 private: 
-	BigNrVec m_vPolynom; // coef of base polynom 
+	BigNrVec m_vPolynom; // same polynomial for all bytes
 						// polynom[0] = the secret 
 	BigNrVec m_vSharingParts; // secret parts know by each people: 
  

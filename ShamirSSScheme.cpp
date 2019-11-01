@@ -5,16 +5,16 @@ using namespace std;
 // Parameters:   
 //  n - total number of people   
 //  k - people need to discover secret   
-ShamirSSScheme::ShamirSSScheme(UInt n, UInt k) :   
+ShamirSSScheme::ShamirSSScheme(UInt n, UInt k, unsigned char c) :   
     m_nN(n), m_nK(k),   
-    m_vSharingParts(n),   
-    m_vPolynom(k)   
+    m_vSharingParts(n),
+    m_vPolynom(k)
 {   
-//  m_bnPrimeNr = NTL::GenPrime_ZZ(16, 100);   
-    m_bnPrimeNr = 11;                       // Prime number :(. Autogenerate it.
-    GeneratePolynom();   
+    m_bnPrimeNr = NTL::GenPrime_ZZ(16, 100);   
+    //m_bnPrimeNr = 11;                       // Prime number :(. Autogenerate it.
+    GeneratePolynom(c);   
     CalculateSharingParts();   
-}   
+}
    
 ShamirSSScheme::~ShamirSSScheme(void)   
 {   
@@ -24,22 +24,25 @@ ShamirSSScheme::~ShamirSSScheme(void)
 // the coeficient are in the order-   
 //  m_vPolynom[i] = coef for x^i   
 // polynom[0] = the secret   
-void ShamirSSScheme::GeneratePolynom()   
-{   
-    for (UInt i = 0; i < m_nK; i++)   
+void ShamirSSScheme::GeneratePolynom(unsigned char c)   
+{
+    //m_vPolynom[0] = c;
+    /*for (UInt i = 1; i < m_nK; i++)   
     {   
-         NTL::RandomBnd(m_vPolynom[i], m_bnPrimeNr);   
-         //cout << "pol[" << i << "] = " << m_vPolynom[i] << '\n';   
-    }   
-    //m_vPolynom[0] = 10;   
-    //m_vPolynom[1] = 7;   
-    //m_vPolynom[2] = 2;   
-   
+        NTL::RandomBnd(m_vPolynom[i], m_bnPrimeNr);  
+        //cout << "pol[" << i << "] = " << m_vPolynom[i] << '\n';   
+    }*/
+    m_vPolynom[0] = c - 48;
+    cout << "Debug: " << m_vPolynom[0] << '\n';
+    m_vPolynom[0] = 2;
+    m_vPolynom[1] = 7;
+    m_vPolynom[2] = 2;
 }   
    
 void ShamirSSScheme::CalculateSharingParts()   
 {   
-    BigNumber aux;   
+    BigNumber aux;
+    cout << "Share among 4 people\n";   
     for (UInt i = 0; i < m_nN; i++)   
     {   
         m_vSharingParts[i] = 0;   
@@ -59,7 +62,7 @@ void ShamirSSScheme::CalculateSharingParts()
 }   
    
 const ShamirSSScheme::BigNrVec& ShamirSSScheme::GetSecretParts()   
-{   
+{
     return m_vSharingParts;   
 }   
    
@@ -67,17 +70,17 @@ const ShamirSSScheme::BigNrVec& ShamirSSScheme::GetSecretParts()
 // otherwise false   
 bool ShamirSSScheme::AccesSecret(const std::vector<UInt>& vPeople, const ShamirSSScheme::BigNrVec &vPeopleSecrets)   
 {   
-    cout << "\nTrying to acces the secret...\n";   
+    cout << "\nTrying to access the secret...\n";   
     UInt peopleNr = (UInt)vPeople.size();   
-    cout << "peopleNR:" << peopleNr << '\n';
+    //cout << "peopleNR:" << peopleNr << '\n';
     if (peopleNr != vPeopleSecrets.size())   
     {   
-        cout << "People nr and secret nr are  not equal\n";   
+        cout << "People nr and secret nr are not equal\n";   
         return false;   
     }   
        
     BigNumber secret, aux, aux1;
-    int aux;   
+
     for (UInt i = 0; i < peopleNr; i++)   
     {   
         aux1 = 1;   
@@ -85,12 +88,12 @@ bool ShamirSSScheme::AccesSecret(const std::vector<UInt>& vPeople, const ShamirS
         {   
             if (vPeople[j] != vPeople[i])   
             {   
-                aux = vPeople[j] - vPeople[i];
-                cout << "j:" << j << '\n';
-                cout << "1 aux: "<< aux << '\n';   
+                aux = (BigNumber)vPeople[j] - vPeople[i];
+                //cout << "j:" << j << '\n';
+                //cout << "1 aux: "<< aux << '\n';   
                 while (aux <= 0)   
                     aux += m_bnPrimeNr;   
-                cout << "2 aux: "<< aux << '\n';   
+                //cout << "2 aux: "<< aux << '\n';   
                 MulMod(aux1, aux1, ((vPeople[j] + 1)*InvMod(aux, m_bnPrimeNr)) % m_bnPrimeNr, m_bnPrimeNr);   
                // cout << "aux1: "<< aux << '\n';   
             }   
@@ -101,13 +104,13 @@ bool ShamirSSScheme::AccesSecret(const std::vector<UInt>& vPeople, const ShamirS
     }   
    
     cout << "Secret: " << m_vPolynom[0] << '\n';   
-    cout << "\nSecret discovered: " << secret <<'\n';   
+    cout << "Secret discovered: " << secret <<'\n';
     if ( secret == m_vPolynom[0])   
     {   
-        cout << "\nSecret Succefuly accesed\n";   
+        //cout << "\nSecret Succefuly accesed\n";   
         return true;   
     }   
    
-    cout << "\nAcces Denied!\n";   
+    //cout << "\nAcces Denied!\n";   
     return false;   
 }  
